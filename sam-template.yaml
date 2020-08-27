@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless java API for todo app
+Globals:
+  Function:
+    Runtime: java8
+    Timeout: 60
+    MemorySize: 512
+
+Resources:
+  TodoListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: todo-all
+      CodeUri: target/todo-list-aws-lambda-1.0-SNAPSHOT.jar
+      Handler: com.pragmatix.todo.handler.TodoRequestHandler::listTodos
+      Policies:
+        DynamoDBReadPolicy:
+          TableName:
+            Ref: TodosTable
+      Events:
+        List:
+          Type: Api
+          Properties:
+            Path: /todos
+            Method: GET
+
+  GetTodoByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: get-todo-by-id
+      CodeUri: target/todo-list-aws-lambda-1.0-SNAPSHOT.jar
+      Handler: com.pragmatix.todo.handler.TodoRequestHandler::getTodoById
+      Policies:
+        DynamoDBReadPolicy:
+          TableName:
+            Ref: TodosTable
+      Events:
+        List:
+          Type: Api
+          Properties:
+            Path: /todos/{id}
+            Method: GET
+
+  CreateTodoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: create-todo
+      CodeUri: target/todo-list-aws-lambda-1.0-SNAPSHOT.jar
+      Handler: com.pragmatix.todo.handler.TodoRequestHandler::createTodo
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName:
+            Ref: TodosTable
+      Events:
+        List:
+          Type: Api
+          Properties:
+            Path: /todos
+            Method: POST
+
+  UpdateTodoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: update-todo
+      CodeUri: target/todo-list-aws-lambda-1.0-SNAPSHOT.jar
+      Handler: com.pragmatix.todo.handler.TodoRequestHandler::updateTodo
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName:
+            Ref: TodosTable
+      Events:
+        List:
+          Type: Api
+          Properties:
+            Path: /todos
+            Method: PUT
+
+  MarkTodoAsCompletedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: mark-todo-as-complated
+      CodeUri: target/todo-list-aws-lambda-1.0-SNAPSHOT.jar
+      Handler: com.pragmatix.todo.handler.TodoRequestHandler::markTodoAsCompleted
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName:
+            Ref: TodosTable
+      Events:
+        List:
+          Type: Api
+          Properties:
+            Path: /todos/{id}
+            Method: PUT
+          
+
+  DeleteTodoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: delete-todo
+      CodeUri: target/todo-list-aws-lambda-1.0-SNAPSHOT.jar
+      Handler: com.pragmatix.todo.handler.TodoRequestHandler::deleteTodo
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName:
+            Ref: TodosTable
+      Events:
+        List:
+          Type: Api
+          Properties:
+            Path: /todos/{id}
+            Method: DELETE
+
+  TodosTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName:
+        Fn::Sub: todo
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
